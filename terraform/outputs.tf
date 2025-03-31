@@ -47,11 +47,11 @@ output "dynamodb_table" {
 output "monitoring" {
   description = "Monitoring configuration details"
   value = {
-    dashboard_url = module.monitoring.dashboard_url
+    dashboard_url   = module.monitoring.dashboard_url
     alert_topic_arn = module.monitoring.alert_topic_arn
     alarms = {
       lambda_errors = module.monitoring.lambda_error_alarm_arn
-      dlq_messages = module.monitoring.dlq_alarm_arn
+      dlq_messages  = module.monitoring.dlq_alarm_arn
     }
   }
 }

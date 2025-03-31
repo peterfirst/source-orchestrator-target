@@ -3,13 +3,8 @@ variable "name_prefix" {
   type        = string
 }
 
-variable "common_tags" {
-  description = "Common tags to be applied to all resources"
-  type        = map(string)
-}
-
-variable "lambda_invoke_arn" {
-  description = "ARN of the Lambda function to invoke"
+variable "aws_region" {
+  description = "AWS region"
   type        = string
 }
 
@@ -17,4 +12,20 @@ variable "log_retention_days" {
   description = "Number of days to retain API Gateway logs"
   type        = number
   default     = 14
+}
+
+variable "common_tags" {
+  description = "Common tags to be applied to all resources"
+  type        = map(string)
+}
+
+
+variable "dynamodb_table" {
+  description = "Dynamodb table name"
+  type        = string
+}
+
+variable "dynamodb_table_arn" {
+  description = "Dynamodb arn of the table name"
+  type        = string
 }
