@@ -8,11 +8,6 @@ variable "common_tags" {
   type        = map(string)
 }
 
-variable "processor_zip_path" {
-  description = "Path to the event processor Lambda function zip"
-  type        = string
-}
-
 variable "dispatcher_zip_path" {
   description = "Path to the event dispatcher Lambda function zip"
   type        = string

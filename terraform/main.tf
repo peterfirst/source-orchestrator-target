@@ -25,7 +25,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   common_tags = {
-    Project     = "chaloub"
+    Project     = "chalhoub"
     ManagedBy   = "terraform"
     Owner       = "peter"
     Environment = "single"
@@ -73,14 +73,13 @@ module "dynamodb_to_sqs" {
 }
 
 # Event Processor Module (Lambda Functions)
-module "event_processor" {
-  source = "./modules/event-processor"
+module "event_dispatcher" {
+  source = "./modules/event-dispatcherr"
 
   name_prefix = var.name_prefix
   common_tags = local.common_tags
 
-  processor_zip_path  = "${path.root}/../dist/handlers/eventProcessor.zip"
-  dispatcher_zip_path = "${path.root}/../dist/handlers/eventDispatcher.zip"
+  dispatcher_zip_path = "${path.root}/../dist/handlers/event-dispatcher.zip"
 
   queue_url = module.queue.queue_url
   queue_arn = module.queue.queue_arn

@@ -54,26 +54,6 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-resource "aws_lambda_function" "event_processor" {
-  filename         = var.processor_zip_path
-  function_name    = "${var.name_prefix}-processor"
-  role            = aws_iam_role.lambda_role.arn
-  handler         = "index.handler"
-  runtime         = "nodejs20.x"
-  
-  memory_size     = 256
-  timeout         = 30
-
-  environment {
-    variables = {
-      TABLE_NAME = var.table_name
-      QUEUE_URL = var.queue_url
-    }
-  }
-
-  tags = var.common_tags
-}
-
 resource "aws_lambda_function" "event_dispatcher" {
   filename         = var.dispatcher_zip_path
   function_name    = "${var.name_prefix}-dispatcher"
