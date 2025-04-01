@@ -38,28 +38,22 @@ graph TD
     A[Source Application] -->|Sends Event| B(AWS API Gateway)
     B -->|Validates & Authenticates| C[AWS Lambda (Event Processor)]
 
-    %% Processing and Storage %%
-    C -->|Enrich Event (Add brand: 'testBrand')| D[(Amazon DynamoDB)]
+    %% Store Payload in DynamoDB %%
+    C -->|Store Payload| D[(Amazon DynamoDB)]
     C -->|Push Event to Queue| E{Amazon SQS}
 
     %% Rate Limited Processing %%
     E -->|Rate-Limited Fetch| F[AWS Lambda (Dispatcher)]
-    F -->|Call GraphQL API| G[Target Application (GraphQL)]
+    F -->|Enrich Event (Add brand: 'testBrand')| G[Target Application (GraphQL)]
     G -->|Response Success| H[Mark Event as Processed in DB]
 
     %% Handling Failures %%
     F --x|Failure (Rate Limit, Error, Timeout)| I[Retry with Exponential Backoff]
     I --x|Max Retries Reached| J{Amazon SQS Dead Letter Queue (DLQ)}
 
-    %% Long-Term Persistence %%
-    J -->|Move Expired Messages| K[(Amazon S3 Archive)]
-    K -->|Store for Long-Term Access| L[AWS Lambda (Reprocessing)]
-    L -->|Requeue Events if Needed| E
-
     %% Monitoring & Observability %%
     C -->|Log & Monitor Events| M[Amazon CloudWatch]
     F -->|Trace Requests| N[AWS X-Ray]
-    J -->|Trigger Alerts| O[AWS SNS Notification]
 ```
 
 ## Technical Requirements

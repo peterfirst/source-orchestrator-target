@@ -21,6 +21,8 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   common_tags = {
     Project     = "chaloub"
@@ -57,6 +59,17 @@ module "queue" {
   name_prefix            = var.name_prefix
   common_tags            = local.common_tags
   allowed_principal_arns = [module.event_processor.lambda_role_arn]
+}
+
+# Use the EventBridge module to route DynamoDB changes to SQS
+module "dynamodb_to_sqs" {
+  source = "./modules/dynamo-to-sqs" # Relative path to your module
+
+  rule_name           = "dynamodb-to-sqs-rule"
+  rule_description    = "Rule to route DynamoDB events to SQS"
+  dynamodb_stream_arn = module.storage.table_stream_arn
+  sqs_queue_arn       = module.queue.queue_arn
+  account_id          = data.aws_caller_identity.current.account_id
 }
 
 # Event Processor Module (Lambda Functions)
