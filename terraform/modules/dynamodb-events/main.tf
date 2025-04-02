@@ -18,9 +18,16 @@ resource "aws_dynamodb_table" "events" {
     type = "S"
   }
 
-  attribute {
-    name = "payload"
-    type = "M"
+  global_secondary_index {
+    name            = "status-index"
+    hash_key        = "status"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "timestamp-index"
+    hash_key        = "timestamp"
+    projection_type = "ALL"
   }
 
   stream_enabled  = true

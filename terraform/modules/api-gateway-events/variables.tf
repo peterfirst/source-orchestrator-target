@@ -19,13 +19,17 @@ variable "common_tags" {
   type        = map(string)
 }
 
-
-variable "dynamodb_table" {
-  description = "Dynamodb table name"
+variable "account_id" {
+  description = "AWS account ID"
   type        = string
 }
 
-variable "dynamodb_table_arn" {
-  description = "Dynamodb arn of the table name"
+variable "processor_function_invoke_arn" {
+  description = "ARN of the Lambda function to invoke"
+  type        = string
+}
+
+variable "health_function_invoke_arn" {
+  description = "ARN of the Lambda function to invoke"
   type        = string
 }
