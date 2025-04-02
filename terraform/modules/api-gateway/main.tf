@@ -72,8 +72,18 @@ resource "aws_apigatewayv2_integration" "dynamodb" {
     "id": {
       "S": "$context.requestId"
     },
-    "eventData": {
-      "S": "$input.body"
+    "timestamp": {
+      "N": "$context.requestTimeEpoch"
+    },
+    "status": {
+      "S": "new"
+    },
+    "payload": {
+      "M": {
+        "eventData": {
+          "S": "$input.body"
+        }
+      }
     }
   }
 }
