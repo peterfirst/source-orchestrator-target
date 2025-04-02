@@ -11,7 +11,7 @@ variable "aws_region" {
 variable "lambda_function_names" {
   description = "Map of Lambda function names to monitor"
   type = object({
-    processor  = string
+    processor = string
     dispatcher = string
   })
 }

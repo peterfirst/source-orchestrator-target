@@ -11,14 +11,14 @@ resource "aws_cloudwatch_dashboard" "main" {
         height = 6
         properties = {
           metrics = [
-            ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_names.processor],
-            ["AWS/Lambda", "Errors", "FunctionName", var.lambda_function_names.processor],
-            ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names.processor]
+            ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_names.dispatcher],
+            ["AWS/Lambda", "Errors", "FunctionName", var.lambda_function_names.dispatcher],
+            ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_names.dispatcher]
           ]
           period = 300
           stat   = "Sum"
           region = var.aws_region
-          title  = "Lambda Processor Metrics"
+          title  = "Lambda Dispatcher Metrics"
         }
       },
       {
@@ -60,7 +60,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_actions      = [aws_sns_topic.alerts.arn]
 
   dimensions = {
-    FunctionName = var.lambda_function_names.processor
+    FunctionName = var.lambda_function_names.dispatcher
   }
 }
 

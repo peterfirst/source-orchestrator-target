@@ -1,4 +1,4 @@
-resource "aws_cloudwatch_event_rule" "this" {
+resource "aws_cloudwatch_event_rule" "dynamodb_stream_to_sqs_rule" {
   name        = var.rule_name
   description = var.rule_description
   event_pattern = jsonencode({
@@ -8,8 +8,8 @@ resource "aws_cloudwatch_event_rule" "this" {
   })
 }
 
-resource "aws_cloudwatch_event_target" "this" {
-  rule      = aws_cloudwatch_event_rule.this.name
+resource "aws_cloudwatch_event_target" "sqs_target" {
+  rule      = aws_cloudwatch_event_rule.dynamodb_stream_to_sqs_rule.name
   arn       = var.sqs_queue_arn
-  target_id = "sqs-target"
+  target_id = var.target_id
 }
