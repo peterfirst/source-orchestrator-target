@@ -1,6 +1,7 @@
 import { SQSRecord } from "aws-lambda";
 
 import {
+  EVENT_NAME,
   updateDBItemStatus,
   EVENT_STATUS,
   DocumentDB,
@@ -20,6 +21,7 @@ import { Logger } from "../utils/logger";
 const logger = new Logger("dispatcher");
 
 interface SQSItemRecord {
+  eventName: 'INSERT' | 'MODIFY' | 'REMOVE';
   NewImage?: {
     id?: { S: string };
     payload?: DocumentDB;
@@ -36,6 +38,12 @@ export const processRecord = async (
 
   try {
     const recordBody: SQSItemRecord = JSON.parse(record.body);
+    
+    if (recordBody?.eventName !== EVENT_NAME.INSERT) {
+      logger.log("Skipping non-insert event");
+      return;
+    }
+
     const item: Document | null = unmarshalDocumentDB(
       recordBody?.NewImage?.payload as DocumentDB,
     );
@@ -47,7 +55,7 @@ export const processRecord = async (
 
     ({ id, payload } = item);
 
-    const updatedPayload = transformPayload(payload, "testBrand");
+    const updatedPayload: ItemWithBrand = transformPayload(payload, "testBrand");
     const graphqlPayload = createGraphQLPayload(updatedPayload);
 
     await postToGraphQL(apiUrl, graphqlPayload);
