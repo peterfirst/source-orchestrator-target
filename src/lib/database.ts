@@ -7,6 +7,12 @@ import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
 
 const db = new DynamoDBClient({});
 
+export enum EVENT_NAME {
+  INSERT = "INSERT",
+  MODIFY = "MODIFY",
+  REMOVE = "REMOVE",
+}
+
 export enum EVENT_STATUS {
   PENDING = "PENDING",
   SUCCEEDED = "SUCCEEDED",
