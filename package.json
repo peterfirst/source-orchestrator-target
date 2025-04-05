@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "directories": {
-    "doc": "docs",
-    "test": "tests"
+    "doc": "docs"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -18,7 +17,8 @@
     "build": "node build.js",
     "postbuild": "npm run package:production",
     "test": "jest",
-    "jest:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
     "prettier": "prettier --write src/**/*.*",
     "lint": "eslint . --ext .ts",
     "typecheck": "tsc --noEmit"
@@ -32,6 +32,7 @@
     "@aws-sdk/client-sqs": "^3.777.0",
     "@aws-sdk/util-dynamodb": "^3.782.0",
     "aws-lambda": "^1.0.7",
+    "axios": "^1.8.4",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

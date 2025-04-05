@@ -12,6 +12,7 @@ import {
   DocumentDB,
   Document,
   EVENT_STATUS,
+  DynamodbSQSRecord
 } from "./database";
 import "aws-sdk-client-mock-jest";
 
@@ -107,18 +108,58 @@ describe("Database Functions", () => {
 
   describe("unmarshalDocumentDB", () => {
     it("should unmarshal a DocumentDB object to a Document object", () => {
-      const documentDB: DocumentDB = {
-        id: { S: "123" },
-        status: { S: "PENDING" },
-        timestamp: { N: "1678886400" },
-        payload: {
-          M: {
-            id: { S: "payload-123" },
-            name: { S: "Test Item" },
-            body: { S: "This is a test item" },
+      const documentDB: DynamodbSQSRecord = {
+        eventName: 'INSERT',
+        dynamodb: {
+          NewImage: {
+            id: { S: "123" },
+            status: { S: "PENDING" },
             timestamp: { N: "1678886400" },
-          },
+            payload: {
+              M: {
+                id: { S: "payload-123" },
+                name: { S: "Test Item" },
+                body: { S: "This is a test item" },
+                timestamp: { N: "1678886400" },
+              },
+            },
+          }
+        }
+      };
+
+      const expectedDocument: Document = {
+        id: "123",
+        status: "PENDING",
+        timestamp: 1678886400,
+        payload: {
+          id: "payload-123",
+          name: "Test Item",
+          body: "This is a test item",
+          timestamp: 1678886400,
         },
+      };
+
+      const result = unmarshalDocumentDB(documentDB);
+      expect(result).toEqual(expectedDocument);
+    });
+    it("should unmarshal a DocumentDB object to a Document object with different eventName", () => {
+      const documentDB: DynamodbSQSRecord = {
+        eventName: 'MODIFY',
+        dynamodb: {
+          NewImage: {
+            id: { S: "123" },
+            status: { S: "PENDING" },
+            timestamp: { N: "1678886400" },
+            payload: {
+              M: {
+                id: { S: "payload-123" },
+                name: { S: "Test Item" },
+                body: { S: "This is a test item" },
+                timestamp: { N: "1678886400" },
+              },
+            },
+          }
+        }
       };
 
       const expectedDocument: Document = {

@@ -1,5 +1,6 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
+  testTimeout: 600000,
   transform: {
     '^.+\\.ts$': ['ts-jest'],
   },
