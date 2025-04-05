@@ -38,6 +38,16 @@ variable "dispatcher_zip_path" {
   type        = string
 }
 
+variable "authorizer_name" {
+  description = "Name of the Lambda authorizer function"
+  type        = string  
+}
+
+variable "authorizer_zip_path" {
+  description = "Path to the event authorizer Lambda function zip"
+  type        = string
+}
+
 variable "health_name" {
   description = "Name of the Lambda health function"
   type        = string  
@@ -93,4 +103,14 @@ variable "timeout" {
   description = "Timeout for the Lambda functions"
   type        = number
   default     = 30
+}
+
+variable "api_gateway_execution_arn" {
+  description = "ARN of the API Gateway"
+  type        = string
+}
+
+variable "api_key" {
+  description = "API key for the API Gateway"
+  type        = string
 }

@@ -28,6 +28,10 @@ output "health_function_arn" {
   value       = aws_lambda_function.health.arn
 }
 
+output "authorizer_function_arn" {
+  value = aws_lambda_function.authorizer_function.arn
+}
+
 output "lambda_role_arn" {
   description = "ARN of the Lambda execution role"
   value       = aws_iam_role.lambda_role.arn

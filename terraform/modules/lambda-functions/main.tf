@@ -146,3 +146,33 @@ resource "aws_lambda_event_source_mapping" "event_source_mapping" {
   batch_size       = 10
   maximum_batching_window_in_seconds = 5
 }
+
+resource "aws_lambda_function" "authorizer_function" {
+  filename         = var.authorizer_zip_path
+  source_code_hash = filebase64sha256(var.authorizer_zip_path)
+  function_name    = "${var.name_prefix}-${var.authorizer_name}"
+  role             = aws_iam_role.lambda_role.arn
+  runtime          = var.runtime
+  handler          = "${var.authorizer_name}.handler"
+
+  memory_size      = var.memory_size
+  timeout          = var.timeout
+  
+  layers           = [aws_lambda_layer_version.node_modules_layer.arn]
+
+  environment {
+    variables = {
+      API_KEY = var.api_key
+    }
+  }
+
+  tags             = var.common_tags
+}
+
+resource "aws_lambda_permission" "allow_apigw_authorizer" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.authorizer_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*"
+}

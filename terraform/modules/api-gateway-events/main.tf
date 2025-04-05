@@ -67,6 +67,15 @@ resource "aws_lambda_permission" "api_gateway" {
   source_arn    = "${aws_apigatewayv2_api.events_api.execution_arn}/*/*/events"
 }
 
+resource "aws_apigatewayv2_authorizer" "api_key_authorizer" {
+  api_id            = aws_apigatewayv2_api.events_api.id
+  authorizer_type   = "REQUEST"
+  name              = "${var.name_prefix}-api-key-authorizer"
+  authorizer_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions:${var.authorizer_function_arn}/invocations"
+  identity_sources = ["$request.header.x-api-key"]
+  authorizer_payload_format_version = "2.0"
+}
+
 # processor
 resource "aws_apigatewayv2_integration" "processor_lambda" {
   api_id                 = aws_apigatewayv2_api.events_api.id
@@ -79,6 +88,8 @@ resource "aws_apigatewayv2_route" "post_event" {
   api_id    = aws_apigatewayv2_api.events_api.id
   route_key = "POST /events"
   target    = "integrations/${aws_apigatewayv2_integration.processor_lambda.id}"
+  authorization_type = "CUSTOM"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key_authorizer.id
 }
 
 # health check
@@ -93,6 +104,8 @@ resource "aws_apigatewayv2_route" "get_health" {
   api_id    = aws_apigatewayv2_api.events_api.id
   route_key = "GET /health"
   target    = "integrations/${aws_apigatewayv2_integration.health_lambda.id}"
+  authorization_type = "CUSTOM"
+  authorizer_id      = aws_apigatewayv2_authorizer.api_key_authorizer.id
 }
 
 resource "aws_lambda_permission" "api_gateway_health" {

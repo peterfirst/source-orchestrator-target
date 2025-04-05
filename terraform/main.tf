@@ -50,6 +50,7 @@ module "api_gateway_events" {
   common_tags                   = local.common_tags
   processor_function_invoke_arn = module.lambda_functions.processor_function_arn
   health_function_invoke_arn    = module.lambda_functions.health_function_arn
+  authorizer_function_arn       = module.lambda_functions.authorizer_function_arn
   account_id                    = data.aws_caller_identity.current.account_id
 }
 
@@ -100,15 +101,20 @@ module "lambda_functions" {
   processor_name  = var.lambda_processor_name
   dispatcher_name = var.lamda_dispatcher_name
   health_name     = var.lambda_health_name
+  authorizer_name = var.lambda_authorizer_name
 
   node_modules_zip_path = "${path.root}/../dist/node_modules.zip"
   processor_zip_path    = "${path.root}/../dist/processor.zip"
   dispatcher_zip_path   = "${path.root}/../dist/dispatcher.zip"
   health_zip_path       = "${path.root}/../dist/health.zip"
+  authorizer_zip_path   = "${path.root}/../dist/authorizer.zip"
 
-  queue_url = module.sqs_events.queue_url
-  queue_arn = module.sqs_events.queue_arn
-  dlq_arn   = module.sqs_events.dlq_arn
+  queue_url                 = module.sqs_events.queue_url
+  queue_arn                 = module.sqs_events.queue_arn
+  dlq_arn                   = module.sqs_events.dlq_arn
+  api_gateway_execution_arn = module.api_gateway_events.api_execution_arn
+
+  api_key = var.api_key
 
   table_name         = module.dynamodb_events.table_name
   dynamodb_table_arn = module.dynamodb_events.table_arn
