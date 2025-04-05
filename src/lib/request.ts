@@ -9,8 +9,8 @@ export type RequestBody = {
 };
 
 export type GraphQLResponse = {
-  data?: any;
-  errors?: any;
+  data?: unknown;
+  errors?: unknown;
 };
 
 export const makeGraphQLMutationRequest = async (

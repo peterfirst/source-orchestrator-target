@@ -1,6 +1,6 @@
 export interface Logger {
-  log: (message: string, details?: Object) => void;
-  error: (message: string, details?: Object) => void;
+  log: (message: string, details?: object) => void;
+  error: (message: string, details?: object) => void;
 }
 
 const cache: { [key: string]: Logger } = {};
@@ -10,7 +10,7 @@ export function createLogger(name: string = "logger"): Logger {
     return cache[name];
   }
   
-  const createLogObject = (message: string, details?: Object) => {
+  const createLogObject = (message: string, details?: object) => {
     try {
       return JSON.stringify({
         name,
@@ -27,10 +27,10 @@ export function createLogger(name: string = "logger"): Logger {
   };
 
   const logger = {
-    log: (message: string, details?: Object): void => {
+    log: (message: string, details?: object): void => {
       console.log(createLogObject(message, details));
     },
-    error: (message: string, details?: Object): void => {
+    error: (message: string, details?: object): void => {
       console.error(createLogObject(message, details));
     },
   }

@@ -4,4 +4,6 @@ dist
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+*.tfvars
 coverage
+terraform.tfvars
