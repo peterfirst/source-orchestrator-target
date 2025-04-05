@@ -23,7 +23,7 @@ export const makeGraphQLRequest = (
 
     const options = {
       hostname: parsedUrl.hostname,
-      port: parsedUrl.port || 443,
+      port: parseInt(parsedUrl.port) || 443,
       path: parsedUrl.pathname,
       method: "POST",
       headers: {
