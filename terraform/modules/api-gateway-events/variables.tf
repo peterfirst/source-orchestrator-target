@@ -33,3 +33,8 @@ variable "health_function_invoke_arn" {
   description = "ARN of the Lambda function to invoke"
   type        = string
 }
+
+variable "authorizer_function_arn" {
+  description = "ARN of the Lambda function to use as an authorizer"
+  type        = string
+}

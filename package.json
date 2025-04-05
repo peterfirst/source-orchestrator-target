@@ -8,10 +8,11 @@
   "scripts": {
     "clean": "rm -rf dist",
     "install:production": "npm install",
-    "package:nodemodules": "mkdir -p dist/nodejs && cd dist/nodejs && ln -sf ../../node_modules && cd ../ && zip -rq node_modules.zip nodejs/",
+    "package:nodemodules": "mkdir -p dist/nodejs && cd dist/nodejs && ln -sf ../../node_modules && cd ../ && zip -rq node_modules.zip nodejs/ && rm -rf dist/nodejs",
     "package:dispatcher": "cd dist && zip -rq dispatcher.zip dispatcher.js",
     "package:processor": "cd dist && zip -rq processor.zip processor.js",
     "package:health": "cd dist && zip -rq health.zip health.js",
+    "package:authorizer": "cd dist && zip -rq authorizer.zip authorizer.js",
     "package:production": "sh package-production.sh",
     "prebuild": "npm run clean && npm run install:production",
     "build": "node build.js",

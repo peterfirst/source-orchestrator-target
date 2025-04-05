@@ -21,8 +21,8 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install all dependencies
+        run: npm install      
 
       - name: Linting
         run: npm run lint
@@ -31,10 +31,16 @@ jobs:
         run: npm run typecheck
 
       - name: Unit testing
-        run: npm run test
+        run: npm run test        
 
       - name: Build
         run: npm run build
+
+      - name: Prune dependencies
+        run: npm prune --production         
+        
+      - name: Package node_modules
+        run: npm run package:nodemodules       
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -62,7 +68,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}"
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -94,6 +100,7 @@ jobs:
           TF_VAR_lambda_processor_name: "processor"
           TF_VAR_lambda_health_name: "health"
           TF_VAR_target_graphql_url: ${{ secrets.TARGET_GRAPHQL_URL }}
+          TF_VAR_api_key: ${{ secrets.API_KEY }}
         run: terraform plan -no-color -out=tfplan
 
       - name: Terraform Plan Summary
@@ -104,4 +111,4 @@ jobs:
       - name: Terraform Apply
         id: apply
         working-directory: ./terraform
-        run: terraform apply --auto-aprove -no-color tfplan
+        run: terraform apply --auto-approve -no-color tfplan

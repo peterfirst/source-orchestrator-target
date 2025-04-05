@@ -57,5 +57,16 @@ variable "lambda_health_name" {
   description = "Name of the Lambda health function"
   type        = string
   default     = "health"
+}
 
+variable "lambda_authorizer_name" {
+  description = "Name of the Lambda authorizer function"
+  type        = string
+  default     = "authorizer"
+}
+
+variable "api_key" {
+  description = "API key for the API Gateway"
+  type        = string
+  default     = ""
 }

@@ -28,6 +28,7 @@ Promise.all([
   buildEntry('src/handlers/processor.ts'),
   buildEntry('src/handlers/dispatcher.ts'),
   buildEntry('src/handlers/health.ts'),
+  buildEntry('src/handlers/authorizer.ts'),
 ]).then(() => {
   console.log('Build process completed.');
 }).catch((error) => {
