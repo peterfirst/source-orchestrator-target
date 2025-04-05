@@ -46,6 +46,9 @@ export const validateRequestBody = (
 
     return parsedBody;
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error("JSON parsing error:", error.message);
+    }
     return null;
   }
 };

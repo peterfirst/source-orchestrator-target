@@ -12,8 +12,8 @@ export type ItemWithBrand = Item & {
 };
 
 export type GraphQLResponse = {
-  data?: any;
-  errors?: any;
+  data?: unknown;
+  errors?: unknown;
 };
 
 export const createGraphQLPayload = (payload: ItemWithBrand): string => {
