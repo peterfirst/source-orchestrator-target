@@ -9,7 +9,7 @@ export function createLogger(name: string = "logger"): Logger {
   if (cache[name]) {
     return cache[name];
   }
-  
+
   const createLogObject = (message: string, details?: object) => {
     try {
       return JSON.stringify({
@@ -21,7 +21,7 @@ export function createLogger(name: string = "logger"): Logger {
       if (error instanceof Error) {
         return error.toString();
       } else {
-        return 'Caught something that is not an Error object';
+        return "Caught something that is not an Error object";
       }
     }
   };
@@ -33,7 +33,7 @@ export function createLogger(name: string = "logger"): Logger {
     error: (message: string, details?: object): void => {
       console.error(createLogObject(message, details));
     },
-  }
+  };
 
   cache[name] = logger;
 

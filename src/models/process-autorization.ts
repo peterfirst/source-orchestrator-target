@@ -46,7 +46,7 @@ export const getResourceArn = (
   event: APIGatewayRequestAuthorizerEvent | APIGatewayTokenAuthorizerEvent,
 ): string | undefined => {
   if ("routeArn" in event) {
-    return event.routeArn;
+    return event.routeArn as string;
   } else if ("methodArn" in event) {
     return event.methodArn;
   }

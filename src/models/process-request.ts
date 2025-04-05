@@ -2,30 +2,29 @@ import { EVENT_STATUS, DocumentDB, insertDBItem } from "../lib/database";
 import { generateTimeStamp } from "../utils/timestamp";
 import { v4 as uuidv4 } from "uuid";
 
-
 export type RequestBody = {
-    id: string;
-    name: string;
-    body: string;
-    timestamp: string;
+  id: string;
+  name: string;
+  body: string;
+  timestamp: string;
 };
 
 const generateItemDB = (requestBody: RequestBody): DocumentDB => {
-const item: DocumentDB = {
+  const item: DocumentDB = {
     id: { S: uuidv4() },
     status: { S: EVENT_STATUS.PENDING },
     timestamp: { N: `${generateTimeStamp()}` },
     payload: {
-    M: {
+      M: {
         id: { S: requestBody.id },
         name: { S: requestBody.name },
         body: { S: requestBody.body },
         timestamp: { N: `${requestBody.timestamp}` },
+      },
     },
-    },
+  };
+  return item;
 };
-return item;
-};  
 
 export const validateRequestBody = (
   body: string | null,
@@ -47,7 +46,7 @@ export const validateRequestBody = (
     return parsedBody;
   } catch (error) {
     if (error instanceof SyntaxError) {
-      console.error("JSON parsing error:", error.message);
+      throw new Error("JSON parsing error");
     }
     return null;
   }

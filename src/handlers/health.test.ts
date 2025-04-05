@@ -1,5 +1,5 @@
 import { handler } from "./health";
-import { HTTP_STATUS_CODE } from "../models/HttpStatus";
+import { HTTP_STATUS_CODE } from "../utils/HttpStatus";
 
 describe("Health Handler", () => {
   it("should return a 200 OK response", async () => {

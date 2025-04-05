@@ -1,8 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { createLogger } from "../utils/logger";
-import { HTTP_STATUS_CODE } from "../models/HttpStatus";
+import { HTTP_STATUS_CODE } from "../utils/HttpStatus";
 import { processRequest, validateRequestBody } from "../models/process-request";
-
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const logger = createLogger("processor");

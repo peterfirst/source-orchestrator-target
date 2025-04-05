@@ -2,7 +2,6 @@ import { SQSHandler, SQSEvent } from "aws-lambda";
 import { createLogger } from "../utils/logger";
 import { processRecord } from "../models/process-records";
 
-
 export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
   const logger = createLogger("dispatcher");
 
@@ -13,7 +12,8 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
     return;
   }
 
-  const apiUrl: string = process.env.TARGET_GRAPHQL_URL || "http://example-domain/graphql";
+  const apiUrl: string =
+    process.env.TARGET_GRAPHQL_URL || "http://example-domain/graphql";
   const tableName: string =
     process.env.DYNAMODB_TABLE_NAME || "chalhoub-events";
 

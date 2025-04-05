@@ -1,6 +1,6 @@
 import { makeGraphQLMutationRequest, GraphQLResponse } from "./request";
 import axios, { AxiosResponse } from "axios";
-import { HTTP_STATUS_CODE } from "../models/HttpStatus";
+import { HTTP_STATUS_CODE } from "../utils/HttpStatus";
 
 jest.mock("axios");
 
@@ -21,18 +21,17 @@ describe("makeGraphQLMutationRequest", () => {
       status: HTTP_STATUS_CODE.OK,
     } as AxiosResponse<GraphQLResponse>);
 
-    const result = await makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload);
-
-    expect(axios.post).toHaveBeenCalledWith(
+    const result = await makeGraphQLMutationRequest(
       mockUrl,
       mockGraphqlPayload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        validateStatus: expect.any(Function),
-      },
     );
+
+    expect(axios.post).toHaveBeenCalledWith(mockUrl, mockGraphqlPayload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      validateStatus: expect.any(Function),
+    });
     expect(result).toEqual(mockResponse);
   });
 
@@ -50,7 +49,7 @@ describe("makeGraphQLMutationRequest", () => {
         makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
       ).rejects.toThrow(
         `GraphQL request failed with status ${mockErrorResponse.status}: ${mockErrorResponse.data}`,
-      ); 
+      );
     } catch (error) {}
   });
 
@@ -62,7 +61,7 @@ describe("makeGraphQLMutationRequest", () => {
     try {
       await expect(
         makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
-      ).rejects.toThrow("GraphQL request failed: No response received");      
+      ).rejects.toThrow("GraphQL request failed: No response received");
     } catch (error) {}
   });
 
@@ -73,7 +72,7 @@ describe("makeGraphQLMutationRequest", () => {
     try {
       await expect(
         makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
-      ).rejects.toThrow(mockError);      
+      ).rejects.toThrow(mockError);
     } catch (error) {}
   });
 
@@ -85,13 +84,13 @@ describe("makeGraphQLMutationRequest", () => {
     (axios.post as jest.Mock).mockRejectedValue({
       response: mockErrorResponse,
     });
-    
+
     try {
       await expect(
         makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
       ).rejects.toThrow(
         `GraphQL request failed with status ${mockErrorResponse.status}: ${mockErrorResponse.data}`,
-      );      
+      );
     } catch (error) {}
   });
 
@@ -102,21 +101,21 @@ describe("makeGraphQLMutationRequest", () => {
       status: HTTP_STATUS_CODE.CREATED,
     } as AxiosResponse<GraphQLResponse>);
 
-    const result = await makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload);
-
-    expect(axios.post).toHaveBeenCalledWith(
+    const result = await makeGraphQLMutationRequest(
       mockUrl,
       mockGraphqlPayload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        validateStatus: expect.any(Function),
-      },
     );
+
+    expect(axios.post).toHaveBeenCalledWith(mockUrl, mockGraphqlPayload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      validateStatus: expect.any(Function),
+    });
     expect(result).toEqual(mockResponse);
 
-    const validateStatus = (axios.post as jest.Mock).mock.calls[0][2].validateStatus;
+    const validateStatus = (axios.post as jest.Mock).mock.calls[0][2]
+      .validateStatus;
     expect(validateStatus(HTTP_STATUS_CODE.OK)).toBe(true);
     expect(validateStatus(HTTP_STATUS_CODE.CREATED)).toBe(true);
     expect(validateStatus(HTTP_STATUS_CODE.MULTIPLE_CHOICES)).toBe(false);
@@ -131,7 +130,7 @@ describe("makeGraphQLMutationRequest", () => {
     try {
       await expect(
         makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
-      ).rejects.toThrow(mockError);   
+      ).rejects.toThrow(mockError);
     } catch (error) {}
   });
 });

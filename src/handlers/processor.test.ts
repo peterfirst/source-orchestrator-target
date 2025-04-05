@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { handler } from "./processor";
 import { createLogger } from "../utils/logger";
-import { HTTP_STATUS_CODE } from "../models/HttpStatus";
+import { HTTP_STATUS_CODE } from "../utils/HttpStatus";
 import { processRequest, validateRequestBody } from "../models/process-request";
 
 jest.mock("../utils/logger", () => ({
@@ -49,13 +49,16 @@ describe("Processor Handler", () => {
     });
     expect(mockLogger.log).toHaveBeenCalledWith(
       "Received APIGatewayProxyHandler Event: ",
-      mockEvent
+      mockEvent,
     );
     expect(mockLogger.log).toHaveBeenCalledWith(
       "APIGatewayProxyHandler Success: ",
-      expect.anything()
+      expect.anything(),
     );
-    expect(processRequest).toHaveBeenCalledWith({ key: "value" }, "chalhoub-events");
+    expect(processRequest).toHaveBeenCalledWith(
+      { key: "value" },
+      "chalhoub-events",
+    );
   });
 
   it("should return 400 BAD REQUEST when request body is invalid", async () => {
@@ -82,11 +85,11 @@ describe("Processor Handler", () => {
     const result = await handler(mockEvent as APIGatewayProxyEvent, null, null);
 
     try {
-        expect(result.statusCode).toBe(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);
-        expect(JSON.parse(result.body)).toEqual({
-          message: "DYNAMODB_TABLE_NAME environment variable is not set",
-        });
-        expect(processRequest).not.toHaveBeenCalled();
+      expect(result.statusCode).toBe(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);
+      expect(JSON.parse(result.body)).toEqual({
+        message: "DYNAMODB_TABLE_NAME environment variable is not set",
+      });
+      expect(processRequest).not.toHaveBeenCalled();
     } catch (error) {}
   });
 
@@ -95,7 +98,9 @@ describe("Processor Handler", () => {
       body: JSON.stringify({ key: "value" }),
     };
     (validateRequestBody as jest.Mock).mockReturnValue({ key: "value" });
-    (processRequest as jest.Mock).mockRejectedValue(new Error("Failed to insert item"));
+    (processRequest as jest.Mock).mockRejectedValue(
+      new Error("Failed to insert item"),
+    );
 
     const result = await handler(mockEvent as APIGatewayProxyEvent, null, null);
 
@@ -106,7 +111,7 @@ describe("Processor Handler", () => {
     });
     expect(mockLogger.error).toHaveBeenCalledWith(
       "APIGatewayProxyHandler Failure:",
-      new Error("Failed to insert item")
+      new Error("Failed to insert item"),
     );
   });
 
@@ -119,12 +124,12 @@ describe("Processor Handler", () => {
 
     const result = await handler(mockEvent as APIGatewayProxyEvent, null, null);
     try {
-        expect(result.statusCode).toBe(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);
-        expect(JSON.parse(result.body)).toEqual({
-          message: "Failed to insert item",
-          error: "An unknown error occurred",
-        });
-        expect(mockLogger.error).toHaveBeenCalled();        
+      expect(result.statusCode).toBe(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR);
+      expect(JSON.parse(result.body)).toEqual({
+        message: "Failed to insert item",
+        error: "An unknown error occurred",
+      });
+      expect(mockLogger.error).toHaveBeenCalled();
     } catch (error) {}
   });
 });

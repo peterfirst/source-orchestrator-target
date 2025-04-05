@@ -51,13 +51,16 @@ describe("SQS Handler", () => {
 
     await handler(sqsEvent);
 
-    expect(mockLogger.log).toHaveBeenCalledWith("Received SQS Event: ", sqsEvent);
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      "Received SQS Event: ",
+      sqsEvent,
+    );
     expect(mockLogger.error).not.toHaveBeenCalled();
 
     expect(processRecord).toHaveBeenCalledWith(
       sqsEvent.Records[0],
       "https://example.com/graphql",
-      "chalhoub-events"
+      "chalhoub-events",
     );
   });
 
@@ -66,7 +69,9 @@ describe("SQS Handler", () => {
 
     await handler(sqsEvent);
 
-    expect(mockLogger.error).toHaveBeenCalledWith("No records found in SQS event");
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "No records found in SQS event",
+    );
     expect(processRecord).not.toHaveBeenCalled();
   });
 
@@ -90,11 +95,11 @@ describe("SQS Handler", () => {
     };
 
     try {
-      await expect(handler(sqsEvent)).rejects.toThrow("TARGET_GRAPHQL_URL environment variable is not set");
-      expect(processRecord).not.toHaveBeenCalled();        
-    } catch (error) {
-      
-    }
+      await expect(handler(sqsEvent)).rejects.toThrow(
+        "TARGET_GRAPHQL_URL environment variable is not set",
+      );
+      expect(processRecord).not.toHaveBeenCalled();
+    } catch (error) {}
   });
 
   it("should throw an error if DYNAMODB_TABLE_NAME is not set", async () => {
@@ -113,15 +118,15 @@ describe("SQS Handler", () => {
           eventSourceARN: "arn:aws:sqs:region:account-id:queue-name",
           awsRegion: "region",
         } as SQSRecord,
-      ]
+      ],
     };
-    
+
     try {
-      await expect(handler(sqsEvent)).rejects.toThrow("DYNAMODB_TABLE_NAME environment variable is not set");
-      expect(processRecord).not.toHaveBeenCalled();      
-    } catch (error) {
-      
-    }
+      await expect(handler(sqsEvent)).rejects.toThrow(
+        "DYNAMODB_TABLE_NAME environment variable is not set",
+      );
+      expect(processRecord).not.toHaveBeenCalled();
+    } catch (error) {}
   });
 
   it("should handle Promise.allSettled correctly", async () => {
@@ -152,12 +157,24 @@ describe("SQS Handler", () => {
       ],
     };
 
-    (processRecord as jest.Mock).mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("Failed"));
+    (processRecord as jest.Mock)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("Failed"));
     await handler(sqsEvent);
 
     expect(processRecord).toHaveBeenCalledTimes(2);
-    expect(processRecord).toHaveBeenNthCalledWith(1, sqsEvent.Records[0], "https://example.com/graphql", "chalhoub-events");
-    expect(processRecord).toHaveBeenNthCalledWith(2, sqsEvent.Records[1], "https://example.com/graphql", "chalhoub-events");
+    expect(processRecord).toHaveBeenNthCalledWith(
+      1,
+      sqsEvent.Records[0],
+      "https://example.com/graphql",
+      "chalhoub-events",
+    );
+    expect(processRecord).toHaveBeenNthCalledWith(
+      2,
+      sqsEvent.Records[1],
+      "https://example.com/graphql",
+      "chalhoub-events",
+    );
   });
 
   it("should process multiple records", async () => {
@@ -191,8 +208,18 @@ describe("SQS Handler", () => {
     await handler(sqsEvent);
 
     expect(processRecord).toHaveBeenCalledTimes(2);
-    expect(processRecord).toHaveBeenNthCalledWith(1, sqsEvent.Records[0], "https://example.com/graphql", "chalhoub-events");
-    expect(processRecord).toHaveBeenNthCalledWith(2, sqsEvent.Records[1], "https://example.com/graphql", "chalhoub-events");
+    expect(processRecord).toHaveBeenNthCalledWith(
+      1,
+      sqsEvent.Records[0],
+      "https://example.com/graphql",
+      "chalhoub-events",
+    );
+    expect(processRecord).toHaveBeenNthCalledWith(
+      2,
+      sqsEvent.Records[1],
+      "https://example.com/graphql",
+      "chalhoub-events",
+    );
   });
 
   it("should use default values if environment variables are not set", async () => {
@@ -217,7 +244,7 @@ describe("SQS Handler", () => {
     expect(processRecord).toHaveBeenCalledWith(
       sqsEvent.Records[0],
       "http://example-domain/graphql",
-      "chalhoub-events"
+      "chalhoub-events",
     );
   });
 });

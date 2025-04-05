@@ -153,9 +153,9 @@ describe("GraphQL Functions", () => {
       const mockError = new Error("Request failed");
       (makeGraphQLMutationRequest as jest.Mock).mockRejectedValue(mockError);
 
-      await expect(
-        postToGraphQL(mockUrl, mockGraphqlPayload),
-      ).rejects.toThrow(mockError);
+      await expect(postToGraphQL(mockUrl, mockGraphqlPayload)).rejects.toThrow(
+        mockError,
+      );
     });
     it("should call makeGraphQLMutationRequest with different parameters", async () => {
       const mockUrl = "http://another-example.com/graphql";
