@@ -34,11 +34,11 @@ export type DocumentDB = {
 };
 
 export type DynamodbSQSRecord = {
-  eventName: 'INSERT' | 'MODIFY' | 'REMOVE';
+  eventName: "INSERT" | "MODIFY" | "REMOVE";
   dynamodb: {
     NewImage: DocumentDB;
-  },
-}
+  };
+};
 
 export type Document = {
   id: string;

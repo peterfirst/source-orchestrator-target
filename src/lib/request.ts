@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { HTTP_STATUS_CODE } from "../models/HttpStatus";
+import { HTTP_STATUS_CODE } from "../utils/HttpStatus";
 
 export type RequestBody = {
   id: string;

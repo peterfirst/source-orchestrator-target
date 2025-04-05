@@ -17,20 +17,19 @@ import {
 } from "../lib/graphql";
 import { createLogger } from "../utils/logger";
 
-
 export const processRecord = async (
   record: SQSRecord,
   apiUrl: string,
   tableName: string,
 ): Promise<void> => {
   const logger = createLogger("process-records");
-  
+
   let id = "";
   let payload: Item | null = null;
 
   try {
     const recordBody: DynamodbSQSRecord = JSON.parse(record.body);
-    
+
     if (recordBody?.eventName !== EVENT_NAME.INSERT) {
       logger.log("Skipping non-insert event");
       return;
@@ -38,14 +37,17 @@ export const processRecord = async (
 
     const item: Document | null = unmarshalDocumentDB(recordBody);
 
-  if (!item) {
+    if (!item) {
       logger.error("Failed to parse item from SQS message body", recordBody);
       return;
     }
 
     ({ id, payload } = item);
 
-    const updatedPayload: ItemWithBrand = transformPayload(payload, "testBrand");
+    const updatedPayload: ItemWithBrand = transformPayload(
+      payload,
+      "testBrand",
+    );
     const graphqlPayload = createGraphQLPayload(updatedPayload);
 
     await postToGraphQL(apiUrl, graphqlPayload);

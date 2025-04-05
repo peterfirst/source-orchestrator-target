@@ -12,7 +12,7 @@ import {
   DocumentDB,
   Document,
   EVENT_STATUS,
-  DynamodbSQSRecord
+  DynamodbSQSRecord,
 } from "./database";
 import "aws-sdk-client-mock-jest";
 
@@ -109,7 +109,7 @@ describe("Database Functions", () => {
   describe("unmarshalDocumentDB", () => {
     it("should unmarshal a DocumentDB object to a Document object", () => {
       const documentDB: DynamodbSQSRecord = {
-        eventName: 'INSERT',
+        eventName: "INSERT",
         dynamodb: {
           NewImage: {
             id: { S: "123" },
@@ -123,8 +123,8 @@ describe("Database Functions", () => {
                 timestamp: { N: "1678886400" },
               },
             },
-          }
-        }
+          },
+        },
       };
 
       const expectedDocument: Document = {
@@ -144,7 +144,7 @@ describe("Database Functions", () => {
     });
     it("should unmarshal a DocumentDB object to a Document object with different eventName", () => {
       const documentDB: DynamodbSQSRecord = {
-        eventName: 'MODIFY',
+        eventName: "MODIFY",
         dynamodb: {
           NewImage: {
             id: { S: "123" },
@@ -158,8 +158,8 @@ describe("Database Functions", () => {
                 timestamp: { N: "1678886400" },
               },
             },
-          }
-        }
+          },
+        },
       };
 
       const expectedDocument: Document = {

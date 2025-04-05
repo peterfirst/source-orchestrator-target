@@ -17,11 +17,9 @@ import {
 import { processRecord } from "./process-records";
 import { createLogger } from "../utils/logger";
 
-
 jest.mock("../lib/database");
 jest.mock("../lib/graphql");
 jest.mock("../utils/logger");
-
 
 describe("processRecord", () => {
   const mockApiUrl = "http://example.com/graphql";
@@ -100,17 +98,16 @@ describe("processRecord", () => {
     (postToGraphQL as jest.Mock).mockResolvedValue({});
     (updateDBItemStatus as jest.Mock).mockResolvedValue({});
     (createLogger as jest.Mock).mockReturnValue(mockLogger);
-    mockParse = jest.spyOn(JSON, 'parse');;
+    mockParse = jest.spyOn(JSON, "parse");
   });
 
   afterEach(() => {
     mockParse.mockRestore();
   });
-  
 
   it("should process a valid INSERT record", async () => {
     mockParse.mockImplementation(() => mockRecordBodyParsed);
-    
+
     await processRecord(mockRecord, mockApiUrl, mockTableName);
 
     expect(unmarshalDocumentDB).toHaveBeenCalledWith(mockRecordBodyParsed);
@@ -139,7 +136,10 @@ describe("processRecord", () => {
       }),
     };
 
-    mockParse.mockImplementation(() => ({ ...mockRecordBodyParsed, eventName: EVENT_NAME.MODIFY }));
+    mockParse.mockImplementation(() => ({
+      ...mockRecordBodyParsed,
+      eventName: EVENT_NAME.MODIFY,
+    }));
 
     await processRecord(nonInsertRecord, mockApiUrl, mockTableName);
 
@@ -152,7 +152,7 @@ describe("processRecord", () => {
   });
 
   it("should handle unmarshalDocumentDB returning null", async () => {
-    mockParse.mockImplementation(() => (mockRecordBodyParsed));
+    mockParse.mockImplementation(() => mockRecordBodyParsed);
 
     (unmarshalDocumentDB as jest.Mock).mockReturnValue(null);
 
@@ -173,7 +173,7 @@ describe("processRecord", () => {
   });
 
   it("should handle errors during processing and update status to FAILED", async () => {
-    mockParse.mockImplementation(() => (mockRecordBodyParsed));
+    mockParse.mockImplementation(() => mockRecordBodyParsed);
 
     const mockError = new Error("Test error");
     (postToGraphQL as jest.Mock).mockRejectedValue(mockError);
@@ -199,7 +199,7 @@ describe("processRecord", () => {
   });
 
   it("should handle errors during updateDBItemStatus and still update status to FAILED", async () => {
-    mockParse.mockImplementation(() => (mockRecordBodyParsed));
+    mockParse.mockImplementation(() => mockRecordBodyParsed);
 
     const mockError = new Error("Test error");
     (updateDBItemStatus as jest.Mock).mockRejectedValueOnce(mockError);
@@ -225,7 +225,7 @@ describe("processRecord", () => {
   });
 
   it("should handle errors during processing and update status to FAILED when error is not instance of Error", async () => {
-    mockParse.mockImplementation(() => (mockRecordBodyParsed));
+    mockParse.mockImplementation(() => mockRecordBodyParsed);
 
     const mockError = "Test error";
     (postToGraphQL as jest.Mock).mockRejectedValue(mockError);
@@ -250,19 +250,23 @@ describe("processRecord", () => {
     );
   });
 
-    it("should handle invalid JSON in record body", async () => {
-        const invalidRecord: SQSRecord = {
-            ...mockRecord,
-            body: "invalid-json",
-        };
+  it("should handle invalid JSON in record body", async () => {
+    const invalidRecord: SQSRecord = {
+      ...mockRecord,
+      body: "invalid-json",
+    };
 
-        await processRecord(invalidRecord, mockApiUrl, mockTableName);
+    await processRecord(invalidRecord, mockApiUrl, mockTableName);
 
-        expect(unmarshalDocumentDB).not.toHaveBeenCalled();
-        expect(transformPayload).not.toHaveBeenCalled();
-        expect(createGraphQLPayload).not.toHaveBeenCalled();
-        expect(postToGraphQL).not.toHaveBeenCalled();
-        expect(updateDBItemStatus).toHaveBeenCalledWith(mockTableName, "", EVENT_STATUS.FAILED);
-        expect(mockLogger.error).toHaveBeenCalled();
-    });
+    expect(unmarshalDocumentDB).not.toHaveBeenCalled();
+    expect(transformPayload).not.toHaveBeenCalled();
+    expect(createGraphQLPayload).not.toHaveBeenCalled();
+    expect(postToGraphQL).not.toHaveBeenCalled();
+    expect(updateDBItemStatus).toHaveBeenCalledWith(
+      mockTableName,
+      "",
+      EVENT_STATUS.FAILED,
+    );
+    expect(mockLogger.error).toHaveBeenCalled();
+  });
 });
