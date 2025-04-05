@@ -1,5 +1,4 @@
-import https from "https";
-import { URL } from "url";
+import axios, { AxiosResponse } from "axios";
 import { HTTP_STATUS_CODE } from "../models/HttpStatus";
 
 export type RequestBody = {
@@ -14,53 +13,37 @@ export type GraphQLResponse = {
   errors?: any;
 };
 
-export const makeGraphQLRequest = (
+export const makeGraphQLMutationRequest = async (
   url: string,
   graphqlPayload: string,
 ): Promise<GraphQLResponse> => {
-  return new Promise((resolve, reject) => {
-    const parsedUrl = new URL(url);
-
-    const options = {
-      hostname: parsedUrl.hostname,
-      port: parseInt(parsedUrl.port) || 443,
-      path: parsedUrl.pathname,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(graphqlPayload),
+  try {
+    const response: AxiosResponse<GraphQLResponse> = await axios.post(
+      url,
+      graphqlPayload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        validateStatus: (status) =>
+          status >= HTTP_STATUS_CODE.OK &&
+          status < HTTP_STATUS_CODE.MULTIPLE_CHOICES,
       },
-    };
-
-    const req = https.request(options, (res) => {
-      let responseBody = "";
-
-      res.on("data", (chunk) => {
-        responseBody += chunk;
-      });
-
-      res.on("end", () => {
-        if (
-          res.statusCode &&
-          res.statusCode >= HTTP_STATUS_CODE.OK &&
-          res.statusCode < HTTP_STATUS_CODE.MULTIPLE_CHOICES
-        ) {
-          resolve(JSON.parse(responseBody));
-        } else {
-          reject(
-            new Error(
-              `GraphQL request failed with status ${res.statusCode}: ${responseBody}`,
-            ),
-          );
-        }
-      });
-    });
-
-    req.on("error", (error) => {
-      reject(error);
-    });
-
-    req.write(graphqlPayload);
-    req.end();
-  });
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        throw new Error(
+          `GraphQL request failed with status ${error.response.status}: ${error.response.data}`,
+        );
+      } else if (error.request) {
+        throw new Error(`GraphQL request failed: No response received`);
+      } else {
+        throw new Error(`GraphQL request failed: ${error.message}`);
+      }
+    } else {
+      throw error;
+    }
+  }
 };

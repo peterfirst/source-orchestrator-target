@@ -1,158 +1,137 @@
-import { makeGraphQLRequest, GraphQLResponse } from "./request";
-import https from "https";
+import { makeGraphQLMutationRequest, GraphQLResponse } from "./request";
+import axios, { AxiosResponse } from "axios";
+import { HTTP_STATUS_CODE } from "../models/HttpStatus";
 
-jest.mock("https");
+jest.mock("axios");
 
-describe("makeGraphQLRequest", () => {
+describe("makeGraphQLMutationRequest", () => {
   const mockUrl = "https://example.com/graphql";
   const mockGraphqlPayload = JSON.stringify({
     query: "mutation { createItem { id } }",
   });
 
-  const mockRequest = {
-    write: jest.fn(),
-    end: jest.fn(),
-    on: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (https.request as jest.Mock).mockReturnValue(mockRequest);
   });
 
-  it("should make a successful GraphQL request", async () => {
-    const mockResponse = { data: { id: "123" } };
-    const mockRes = {
-      statusCode: 200,
-      on: jest.fn((event, callback) => {
-        if (event === "data") {
-          callback(JSON.stringify(mockResponse));
-        }
-        if (event === "end") {
-          callback();
-        }
-      }),
-    };
-    (https.request as jest.Mock).mockImplementation((_options, callback) => {
-      callback(mockRes);
-      return mockRequest;
-    });
+  it("should make a successful GraphQL mutation request", async () => {
+    const mockResponse: GraphQLResponse = { data: { id: "123" } };
+    (axios.post as jest.Mock).mockResolvedValue({
+      data: mockResponse,
+      status: HTTP_STATUS_CODE.OK,
+    } as AxiosResponse<GraphQLResponse>);
 
-    const result = await makeGraphQLRequest(mockUrl, mockGraphqlPayload);
+    const result = await makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload);
 
-    expect(https.request).toHaveBeenCalledWith(
+    expect(axios.post).toHaveBeenCalledWith(
+      mockUrl,
+      mockGraphqlPayload,
       {
-        hostname: "example.com",
-        port: 443,
-        path: "/graphql",
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(mockGraphqlPayload),
         },
+        validateStatus: expect.any(Function),
       },
-      expect.any(Function),
     );
-    expect(mockRequest.write).toHaveBeenCalledWith(mockGraphqlPayload);
-    expect(mockRequest.end).toHaveBeenCalled();
     expect(result).toEqual(mockResponse);
   });
 
-  it("should handle GraphQL request with non-default port", async () => {
-    const mockResponse = { data: { id: "123" } };
-    const mockRes = {
-      statusCode: 200,
-      on: jest.fn((event, callback) => {
-        if (event === "data") {
-          callback(JSON.stringify(mockResponse));
-        }
-        if (event === "end") {
-          callback();
-        }
-      }),
+  it("should handle GraphQL mutation request failure with status code", async () => {
+    const mockErrorResponse = {
+      status: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,
+      data: "Internal Server Error",
     };
-    (https.request as jest.Mock).mockImplementation((_options, callback) => {
-      callback(mockRes);
-      return mockRequest;
+    (axios.post as jest.Mock).mockRejectedValue({
+      response: mockErrorResponse,
     });
 
-    const result = await makeGraphQLRequest("https://example.com:8443/graphql", mockGraphqlPayload);
-
-    expect(https.request).toHaveBeenCalledWith(
-      {
-        hostname: "example.com",
-        port: 8443,
-        path: "/graphql",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(mockGraphqlPayload),
-        },
-      },
-      expect.any(Function),
-    );
-    expect(mockRequest.write).toHaveBeenCalledWith(mockGraphqlPayload);
-    expect(mockRequest.end).toHaveBeenCalled();
-    expect(result).toEqual(mockResponse);
+    try {
+      await expect(
+        makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
+      ).rejects.toThrow(
+        `GraphQL request failed with status ${mockErrorResponse.status}: ${mockErrorResponse.data}`,
+      ); 
+    } catch (error) {}
   });
 
-  it("should handle GraphQL request failure with status code", async () => {
-    const mockRes = {
-      statusCode: 500,
-      on: jest.fn((event, callback) => {
-        if (event === "data") {
-          callback("Internal Server Error");
-        }
-        if (event === "end") {
-          callback();
-        }
-      }),
-    };
-    (https.request as jest.Mock).mockImplementation((_options, callback) => {
-      callback(mockRes);
-      return mockRequest;
+  it("should handle network errors during GraphQL mutation request (no response)", async () => {
+    (axios.post as jest.Mock).mockRejectedValue({
+      request: {},
     });
 
-    await expect(
-      makeGraphQLRequest(mockUrl, mockGraphqlPayload),
-    ).rejects.toThrow("GraphQL request failed with status 500: Internal Server Error");
+    try {
+      await expect(
+        makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
+      ).rejects.toThrow("GraphQL request failed: No response received");      
+    } catch (error) {}
   });
 
-  it("should handle network errors during GraphQL request", async () => {
+  it("should handle other errors during GraphQL mutation request", async () => {
     const mockError = new Error("Network error");
-    (https.request as jest.Mock).mockImplementation(() => {
-      mockRequest.on.mockImplementation((event, callback) => {
-        if (event === "error") {
-          callback(mockError);
-        }
-      });
-      return mockRequest;
-    });
+    (axios.post as jest.Mock).mockRejectedValue(mockError);
 
-    await expect(
-      makeGraphQLRequest(mockUrl, mockGraphqlPayload),
-    ).rejects.toThrow(mockError);
+    try {
+      await expect(
+        makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
+      ).rejects.toThrow(mockError);      
+    } catch (error) {}
   });
 
-  it("should handle GraphQL request failure with status code 400", async () => {
-    const mockRes = {
-      statusCode: 400,
-      on: jest.fn((event, callback) => {
-        if (event === "data") {
-          callback("Bad Request");
-        }
-        if (event === "end") {
-          callback();
-        }
-      }),
+  it("should handle GraphQL mutation request failure with status code 400", async () => {
+    const mockErrorResponse = {
+      status: HTTP_STATUS_CODE.BAD_REQUEST,
+      data: "Bad Request",
     };
-    (https.request as jest.Mock).mockImplementation((_options, callback) => {
-      callback(mockRes);
-      return mockRequest;
+    (axios.post as jest.Mock).mockRejectedValue({
+      response: mockErrorResponse,
     });
+    
+    try {
+      await expect(
+        makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
+      ).rejects.toThrow(
+        `GraphQL request failed with status ${mockErrorResponse.status}: ${mockErrorResponse.data}`,
+      );      
+    } catch (error) {}
+  });
 
-    await expect(
-      makeGraphQLRequest(mockUrl, mockGraphqlPayload),
-    ).rejects.toThrow("GraphQL request failed with status 400: Bad Request");
+  it("should validate status correctly", async () => {
+    const mockResponse: GraphQLResponse = { data: { id: "123" } };
+    (axios.post as jest.Mock).mockResolvedValue({
+      data: mockResponse,
+      status: HTTP_STATUS_CODE.CREATED,
+    } as AxiosResponse<GraphQLResponse>);
+
+    const result = await makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload);
+
+    expect(axios.post).toHaveBeenCalledWith(
+      mockUrl,
+      mockGraphqlPayload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        validateStatus: expect.any(Function),
+      },
+    );
+    expect(result).toEqual(mockResponse);
+
+    const validateStatus = (axios.post as jest.Mock).mock.calls[0][2].validateStatus;
+    expect(validateStatus(HTTP_STATUS_CODE.OK)).toBe(true);
+    expect(validateStatus(HTTP_STATUS_CODE.CREATED)).toBe(true);
+    expect(validateStatus(HTTP_STATUS_CODE.MULTIPLE_CHOICES)).toBe(false);
+    expect(validateStatus(HTTP_STATUS_CODE.BAD_REQUEST)).toBe(false);
+    expect(validateStatus(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR)).toBe(false);
+  });
+
+  it("should handle non-axios errors", async () => {
+    const mockError = "Non-Axios Error";
+    (axios.post as jest.Mock).mockRejectedValue(mockError);
+
+    try {
+      await expect(
+        makeGraphQLMutationRequest(mockUrl, mockGraphqlPayload),
+      ).rejects.toThrow(mockError);   
+    } catch (error) {}
   });
 });

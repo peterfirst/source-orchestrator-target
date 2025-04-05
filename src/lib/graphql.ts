@@ -1,4 +1,4 @@
-import { makeGraphQLRequest } from "./request";
+import { makeGraphQLMutationRequest } from "./request";
 
 export type Item = {
   id: string;
@@ -19,13 +19,13 @@ export type GraphQLResponse = {
 export const createGraphQLPayload = (payload: ItemWithBrand): string => {
   const mutation: string = `
         mutation createData($id: String!, $name: String!, $body: String!, $timestamp: Int!, $brand: String!) {
-        createItem(id: $id, name: $name, body: $body, timestamp: $timestamp, brand: $brand) {
-            id
-            name
-            body
-            timestamp
-            brand
-        }
+          createItem(id: $id, name: $name, body: $body, timestamp: $timestamp, brand: $brand) {
+              id
+              name
+              body
+              timestamp
+              brand
+          }
         }
     `;
 
@@ -52,5 +52,5 @@ export const postToGraphQL = (
   url: string,
   graphqlPayload: string,
 ): Promise<GraphQLResponse> => {
-  return makeGraphQLRequest(url, graphqlPayload);
+  return makeGraphQLMutationRequest(url, graphqlPayload);
 };

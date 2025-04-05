@@ -33,6 +33,13 @@ export type DocumentDB = {
   };
 };
 
+export type DynamodbSQSRecord = {
+  eventName: 'INSERT' | 'MODIFY' | 'REMOVE';
+  dynamodb: {
+    NewImage: DocumentDB;
+  },
+}
+
 export type Document = {
   id: string;
   status: string;
@@ -81,8 +88,8 @@ export const updateDBItemStatus = async (
   await db.send(command);
 };
 
-export const unmarshalDocumentDB = (document: DocumentDB): Document => {
-  return unmarshall(document) as Document;
+export const unmarshalDocumentDB = (document: DynamodbSQSRecord): Document => {
+  return unmarshall(document.dynamodb.NewImage) as Document;
 };
 
 export const marshalDocumentDB = (document: Document): DocumentDB => {

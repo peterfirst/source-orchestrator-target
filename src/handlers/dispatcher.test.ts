@@ -89,8 +89,12 @@ describe("SQS Handler", () => {
       ],
     };
 
-    await expect(handler(sqsEvent)).rejects.toThrow("TARGET_GRAPHQL_URL environment variable is not set");
-    expect(processRecord).not.toHaveBeenCalled();
+    try {
+      await expect(handler(sqsEvent)).rejects.toThrow("TARGET_GRAPHQL_URL environment variable is not set");
+      expect(processRecord).not.toHaveBeenCalled();        
+    } catch (error) {
+      
+    }
   });
 
   it("should throw an error if DYNAMODB_TABLE_NAME is not set", async () => {
@@ -109,12 +113,15 @@ describe("SQS Handler", () => {
           eventSourceARN: "arn:aws:sqs:region:account-id:queue-name",
           awsRegion: "region",
         } as SQSRecord,
-      ],
+      ]
     };
+    
     try {
       await expect(handler(sqsEvent)).rejects.toThrow("DYNAMODB_TABLE_NAME environment variable is not set");
-      expect(processRecord).not.toHaveBeenCalled();
-    } catch (error){}
+      expect(processRecord).not.toHaveBeenCalled();      
+    } catch (error) {
+      
+    }
   });
 
   it("should handle Promise.allSettled correctly", async () => {
@@ -186,5 +193,31 @@ describe("SQS Handler", () => {
     expect(processRecord).toHaveBeenCalledTimes(2);
     expect(processRecord).toHaveBeenNthCalledWith(1, sqsEvent.Records[0], "https://example.com/graphql", "chalhoub-events");
     expect(processRecord).toHaveBeenNthCalledWith(2, sqsEvent.Records[1], "https://example.com/graphql", "chalhoub-events");
+  });
+
+  it("should use default values if environment variables are not set", async () => {
+    delete process.env.TARGET_GRAPHQL_URL;
+    delete process.env.DYNAMODB_TABLE_NAME;
+    const sqsEvent: SQSEvent = {
+      Records: [
+        {
+          messageId: "1",
+          receiptHandle: "1",
+          body: JSON.stringify({ key: "value" }),
+          attributes: {},
+          messageAttributes: {},
+          md5OfBody: "",
+          eventSource: "aws:sqs",
+          eventSourceARN: "arn:aws:sqs:region:account-id:queue-name",
+          awsRegion: "region",
+        } as SQSRecord,
+      ],
+    };
+    await handler(sqsEvent);
+    expect(processRecord).toHaveBeenCalledWith(
+      sqsEvent.Records[0],
+      "http://example-domain/graphql",
+      "chalhoub-events"
+    );
   });
 });

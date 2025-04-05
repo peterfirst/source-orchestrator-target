@@ -13,18 +13,16 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<void> => {
     return;
   }
 
-  const apiUrl: string = process.env.TARGET_GRAPHQL_URL || "";
+  const apiUrl: string = process.env.TARGET_GRAPHQL_URL || "http://example-domain/graphql";
   const tableName: string =
     process.env.DYNAMODB_TABLE_NAME || "chalhoub-events";
 
   if (!apiUrl) {
     throw new Error("TARGET_GRAPHQL_URL environment variable is not set");
-    return;
   }
 
   if (!tableName) {
     throw new Error("DYNAMODB_TABLE_NAME environment variable is not set");
-    return;
   }
 
   await Promise.allSettled(

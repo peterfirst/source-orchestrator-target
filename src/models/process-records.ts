@@ -4,7 +4,7 @@ import {
   EVENT_NAME,
   updateDBItemStatus,
   EVENT_STATUS,
-  DocumentDB,
+  DynamodbSQSRecord,
   Document,
   unmarshalDocumentDB,
 } from "../lib/database";
@@ -15,16 +15,8 @@ import {
   Item,
   ItemWithBrand,
 } from "../lib/graphql";
-
 import { createLogger } from "../utils/logger";
 
-interface SQSItemRecord {
-  eventName: 'INSERT' | 'MODIFY' | 'REMOVE';
-  NewImage?: {
-    id?: { S: string };
-    payload?: DocumentDB;
-  };
-}
 
 export const processRecord = async (
   record: SQSRecord,
@@ -37,18 +29,16 @@ export const processRecord = async (
   let payload: Item | null = null;
 
   try {
-    const recordBody: SQSItemRecord = JSON.parse(record.body);
+    const recordBody: DynamodbSQSRecord = JSON.parse(record.body);
     
     if (recordBody?.eventName !== EVENT_NAME.INSERT) {
       logger.log("Skipping non-insert event");
       return;
     }
 
-    const item: Document | null = unmarshalDocumentDB(
-      recordBody?.NewImage?.payload as DocumentDB,
-    );
+    const item: Document | null = unmarshalDocumentDB(recordBody);
 
-    if (!item) {
+  if (!item) {
       logger.error("Failed to parse item from SQS message body", recordBody);
       return;
     }
