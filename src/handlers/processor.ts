@@ -1,11 +1,12 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { Logger } from "../utils/logger";
+import { createLogger } from "../utils/logger";
 import { HTTP_STATUS_CODE } from "../models/HttpStatus";
 import { processRequest, validateRequestBody } from "../models/process-request";
 
-const logger = new Logger("processor");
 
 export const handler: APIGatewayProxyHandler = async (event) => {
+  const logger = createLogger("processor");
+
   logger.log("Received APIGatewayProxyHandler Event: ", event);
   const tableName: string =
     process.env.DYNAMODB_TABLE_NAME || "chalhoub-events";

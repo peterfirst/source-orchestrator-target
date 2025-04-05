@@ -16,9 +16,7 @@ import {
   ItemWithBrand,
 } from "../lib/graphql";
 
-import { Logger } from "../utils/logger";
-
-const logger = new Logger("dispatcher");
+import { createLogger } from "../utils/logger";
 
 interface SQSItemRecord {
   eventName: 'INSERT' | 'MODIFY' | 'REMOVE';
@@ -33,6 +31,8 @@ export const processRecord = async (
   apiUrl: string,
   tableName: string,
 ): Promise<void> => {
+  const logger = createLogger("process-records");
+  
   let id = "";
   let payload: Item | null = null;
 

@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "install:production": "npm install",
-    "package:nodemodules": "cd dist && zip -rq node_modules.zip ../node_modules",
+    "package:nodemodules": "mkdir -p dist/nodejs && cd dist/nodejs && ln -sf ../../node_modules && cd ../ && zip -rq node_modules.zip nodejs/",
     "package:dispatcher": "cd dist && zip -rq dispatcher.zip dispatcher.js",
     "package:processor": "cd dist && zip -rq processor.zip processor.js",
     "package:health": "cd dist && zip -rq health.zip health.js",
@@ -38,6 +38,8 @@
     "@types/aws-lambda": "^8.10.148",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.17",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-jest": "^4.1.0",
     "esbuild": "^0.25.2",
     "esbuild-node-externals": "^1.18.0",
     "eslint": "^9.23.0",
